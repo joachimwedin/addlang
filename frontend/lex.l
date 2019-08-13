@@ -8,11 +8,16 @@
 extern "C" int yywrap() { }
 %}
 
+ws (\t|" ")+
+digit [0-9]
+num {digit}+
+
 %% /* Rules */
 
-[ \t\n]            ;
-[0-9]+             SAVE_TOKEN; return INTEGER;
+{ws}               ;
+"\n"               ;
+{num}              SAVE_TOKEN; return INTEGER;
 "+"                return TOKEN(PLUS);
-.                  printf("Unknown token!n"); yyterminate();
+.                  printf("Unknown token!n: %s", yytext); yyterminate();
 
 %% /* User code */

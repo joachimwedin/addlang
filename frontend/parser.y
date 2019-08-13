@@ -1,8 +1,9 @@
 %{
     #include "node.hpp"
-    Program *program; /* the top level root node of our final AST */
-
+    Program *programRoot; /* the top level root node of our final AST */
+    #define YYDEBUG 1
     extern int yylex();
+    extern FILE *yyin;
     void yyerror(const char *s) { printf("ERROR: %sn", s); }
 %}
 
@@ -14,6 +15,11 @@
     std::string* string;
     int token;
 }
+%code provides {
+const char* token_string(int token);
+}
+
+%define parse.trace
 
 /* Define our terminal symbols (tokens). This should
    match our tokens.l lex file. We also define the node type
@@ -27,33 +33,38 @@
    we call an ident (defined by union type ident) we are really
    calling an (NIdentifier*). It makes the compiler happy.
  */
-%type <program> program
+%type <program> prog
 %type <expression> expression
 %type <expression> numeral
 
-%start program
+%start prog
 
 %%
 
-program:
+prog:
                 expression
                 {
-                        program = new Program(*$1);
+                        programRoot = new Program($1);
                 }
                 ;
 
 numeral:
                 INTEGER
                 {
-                        $$ = new Integer(atol($1->c_str())); delete $1;
+                        $$ = new Integer(stoi(*$1)); delete $1;
                 }
                 ;
 
 expression:
                 expression PLUS numeral
                 {
-                        $$ = new Add(*$1, *$3);
+                        $$ = new Add($1, $3);
                 }
 
                 | numeral
                 ;
+
+%%
+const char* token_string(int token) {
+        return yytname[yytranslate[token]];
+}

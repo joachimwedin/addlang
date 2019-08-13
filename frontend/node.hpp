@@ -1,36 +1,51 @@
+#ifndef NODE_H
+#define NODE_H
+
+#define MAKE_VISITABLE virtual void accept(Visitor* v) const { v->visit(*this); }
+
+class Program;
+class Expression;
+class Add;
+class Integer;
+
 #include <iostream>
 #include <vector>
-#include <llvm/IR/Value.h>
-
-class Expression;
+#include "visitor.hpp"
 
 class Node {
  public:
-        virtual ~Node() {}
-        virtual llvm::Value* codeGen() { }
+        virtual ~Node() { }
+        virtual void accept(Visitor* v) const = 0;
+};
+
+class Expression : public Node {
+public:
+        virtual ~Expression() { }
 };
 
 class Program : public Node {
 public:
-        Program(const Expression& expression): e(expression) { }
-private:
-        const Expression& e;
-};
-
-class Expression : public Node {
+        Program(const Expression* expression);
+        ~Program();
+        MAKE_VISITABLE
+        const Expression* e;
 };
 
 class Add : public Expression {
 public:
-        Add(const Expression& e1, const Expression& e2): e1(e1), e2(e2) { }
-private:
-        const Expression& e1;
-        const Expression& e2;
+        Add(const Expression* e1, const Expression* e2);
+        ~Add();
+        MAKE_VISITABLE
+        const Expression* e1;
+        const Expression* e2;
 };
 
 class Integer : public Expression {
 public:
-        Integer(const int& val): val(val) { }
-private:
-        const int& val;
+        Integer(const int val);
+        ~Integer();
+        MAKE_VISITABLE
+        const int val;
 };
+
+#endif // NODE_H
