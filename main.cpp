@@ -21,6 +21,7 @@
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
+#include "gtest/gtest.h"
 
 #include <algorithm>
 #include <cassert>
